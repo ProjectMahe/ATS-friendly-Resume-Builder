@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATSFlow – Resume Builder</title>
+</head>
+<body>
+
+<script>
+    /*
+    This JavaScript file combines the HTML structure, CSS styles, and interactive functionality
+    of the ATSFlow resume builder into a single, dynamically-generated page.
+    */
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // Helper function to inject CSS into the head of the document
+        const injectStyles = () => {
+            const style = document.createElement('style');
+            style.innerHTML = `
+                :root {
+                    --bg: #0b1020; /* deep navy */
+                    --panel: #111735; /* card */
+                    --muted: #8ea0ff; /* accents */
+                    --text: #e8ebff; /* primary text */
+                    --sub: #b9c2ff; /* secondary */
+                    --ok: #22c55e; /* green */
+                    --warn: #f59e0b; /* amber */
+                    --bad: #ef4444; /* red */
+                    --radius: 18px;
+                    --shadow: 0 10px 26px rgba(0, 0, 0, .35);
+                }
+
+                * {
+                    box-sizing: border-box
+                }
+
+                html,
+                body {
+                    height: 100%
+                }
+
+                body {
+                    margin: 0;
+                    background: linear-gradient(135deg, #0b1020 0%, #0e1533 60%, #10173f 100%);
+                    font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+                    color: var(--text);
+                }
+
+                header {
+                    padding: 18px 20px;
+                    position: sticky;
+                    top: 0;
+                    backdrop-filter: saturate(140%) blur(8px);
+                    background: rgba(11, 16, 32, .55);
+                    border-bottom: 1px solid rgba(255, 255, 255, .06);
+                    z-index: 10;
+                }
+
+                .brand {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    font-weight: 800;
+                    letter-spacing: .3px
+                }
+
+                .brand-badge {
+                    width: 38px;
+                    height: 38px;
+                    border-radius: 12px;
+                    display: grid;
+                    place-items: center;
+                    background: linear-gradient(135deg, #6a7bff, #64e1b9);
+                    color: #0b1020;
+                    font-weight: 900
+                }
+
+                .wrap {
+                    max-width: 1200px;
+                    margin: 26px auto;
+                    padding: 0 16px
+                }
+
+                .grid {
+                    display: grid;
+                    grid-template-columns: 420px 1fr;
+                    gap: 22px;
+                }
+
+                .card {
+                    background: var(--panel);
+                    border: 1px solid rgba(255, 255, 255, .06);
+                    border-radius: var(--radius);
+                    box-shadow: var(--shadow)
+                }
+
+                .card .head {
+                    padding: 18px 18px 10px;
+                    font-weight: 700;
+                    color: var(--sub)
+                }
+
+                .card .body {
+                    padding: 18px
+                }
+
+                .muted {
+                    color: var(--sub)
+                }
+
+                .row {
+                    display: flex;
+                    gap: 12px
+                }
+
+                label {
+                    font-size: .86rem;
+                    color: var(--sub);
+                    display: block;
+                    margin: 10px 0 6px
+                }
+
+                input,
+                textarea,
+                select {
+                    width: 100%;
+                    padding: 12px 14px;
+                    border-radius: 12px;
+                    border: 1px solid rgba(255, 255, 255, .08);
+                    background: #0b0f27;
+                    color: var(--text);
+                    outline: none;
+                    box-shadow: inset 0 0 0 9999px transparent;
+                    transition: border-color .2s, box-shadow .2s;
+                }
+
+                input:focus,
+                textarea:focus,
+                select:focus {
+                    border-color: #6a7bff;
+                    box-shadow: 0 0 0 3px rgba(106, 123, 255, .18)
+                }
+
+                textarea {
+                    min-height: 96px;
+                    resize: vertical
+                }
+
+                .stepper {
+                    display: flex;
+                    gap: 10px;
+                    padding: 14px;
+                    flex-wrap: wrap
+                }
+
+                .chip {
+                    padding: 10px 12px;
+                    border-radius: 999px;
+                    border: 1px solid rgba(255, 255, 255, .08);
+                    background: #0c1230;
+                    font-weight: 600;
+                    font-size: .9rem;
+                    color: var(--sub);
+                    display: flex;
+                    align-items: center;
+                    gap: 8px
+                }
+
+                .chip.active {
+                    background: linear-gradient(135deg, rgba(106, 123, 255, .25), rgba(100, 225, 185, .25));
+                    color: var(--text);
+                    border-color: rgba(255, 255, 255, .18)
+                }
+
+                .chip .dot {
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 999px;
+                    background: #6a7bff
+                }
+
+                .actions {
+                    display: flex;
+                    gap: 10px;
+                    flex-wrap: wrap
+                }
+
+                .btn {
+                    appearance: none;
+                    border: none;
+                    padding: 12px 14px;
+                    border-radius: 12px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    color: #0b1020;
+                    background: #8ea0ff
+                }
+
+                .btn.alt {
+                    background: #64e1b9
+                }
+
+                .btn.ghost {
+                    background: transparent;
+                    color: var(--text);
+                    border: 1px solid rgba(255, 255, 255, .16)
+                }
+
+                .btn.warn {
+                    background: var(--warn);
+                    color: #1a1200
+                }
+
+                .btn.ok {
+                    background: var(--ok)
+                }
+
+                .repeatable .row {
+                    align-items: flex-end
+                }
+
+                .repeatable .remove {
+                    padding: 10px 12px;
+                    border-radius: 12px;
+                    border: 1px dashed rgba(255, 255, 255, .2);
+                    background: transparent;
+                    color: var(--sub)
+                }
+
+                .preview {
+                    padding: 24px;
+                    line-height: 1.33;
+                    font-family: Arial, Helvetica, sans-serif;
+                    background: #fff;
+                    color: #000;
+                    border-radius: 12px
+                }
+
+                .preview h1 {
+                    font-size: 22px;
+                    margin: 0 0 2px;
+                    text-transform: uppercase;
+                    letter-spacing: .6px
+                }
+
+                .preview .meta {
+                    font-size: 12px;
+                    color: #111
+                }
+
+                .preview h2 {
+                    font-size: 14px;
+                    margin: 14px 0 6px;
+                    border-bottom: 1px solid #000;
+                    padding-bottom: 4px;
+                    letter-spacing: .4px;
+                    text-transform: uppercase
+                }
+
+                .preview ul {
+                    margin: 6px 0 6px 18px
+                }
+
+                .preview li {
+                    margin: 4px 0
+                }
+
+                .tips {
+                    font-size: .9rem;
+                    color: var(--sub)
+                }
+
+                .footer-note {
+                    margin-top: 10px;
+                    font-size: .82rem;
+                    color: var(--sub)
+                }
+
+                @media (max-width: 980px) {
+                    .grid {
+                        grid-template-columns: 1fr
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        };
+
+        // Helper function to inject external scripts
+        const injectScripts = () => {
+            const scripts = [
+                'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.min.js'
+            ];
+            scripts.forEach(src => {
+                const script = document.createElement('script');
+                script.src = src;
+                document.head.appendChild(script);
+            });
+        };
+
+        // Generate the HTML structure and inject it into the body
+        const createPageStructure = () => {
+            document.body.innerHTML = `
+                <header>
+                    <div class="wrap">
+                        <div class="brand">
+                            <div class="brand-badge">AF</div>
+                            ATSFlow <span class="muted">ATS‑friendly Resume Builder • 100% client‑side</span>
+                        </div>
+                    </div>
+                </header>
+                <div class="wrap grid">
+                    <section class="card">
+                        <div class="head">Build your resume</div>
+                        <div class="body">
+                            <div class="stepper" id="stepper"></div>
+                            <form id="wizard" autocomplete="on">
+                                <div class="step" data-step="1">
+                                    <div class="tips">Only a few fields are required. You can add or edit later.</div>
+                                    <div class="row">
+                                        <div style="flex:1">
+                                            <label>First name *</label>
+                                            <input required name="firstName" placeholder="Aarav" />
+                                        </div>
+                                        <div style="width:120px">
+                                            <label>Middle</label>
+                                            <input name="middleName" placeholder="—" />
+                                        </div>
+                                        <div style="flex:1">
+                                            <label>Last name *</label>
+                                            <input required name="lastName" placeholder="Sharma" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div style="flex:1">
+                                            <label>Email *</label>
+                                            <input required type="email" name="email" placeholder="you@example.com" />
+                                        </div>
+                                        <div style="flex:1">
+                                            <label>Phone</label>
+                                            <input name="phone" placeholder="+91 9xxxxxxxxx" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div style="flex:1">
+                                            <label>City, Country</label>
+                                            <input name="location" placeholder="Mysuru, India" />
+                                        </div>
+                                        <div style="flex:1">
+                                            <label>Date of Birth</label>
+                                            <input name="dob" type="date" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div style="flex:1">
+                                            <label>LinkedIn</label>
+                                            <input name="linkedin" placeholder="linkedin.com/in/username" />
+                                        </div>
+                                        <div style="flex:1">
+                                            <label>GitHub / Portfolio</label>
+                                            <input name="github" placeholder="github.com/username" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="step" data-step="2" hidden>
+                                    <div class="repeatable" id="eduList"></div>
+                                    <div class="actions" style="margin-top:6px">
+                                        <button type="button" class="btn ghost" onclick="addEducation()">+ Add education</button>
+                                    </div>
+                                </div>
+                                <div class="step" data-step="3" hidden>
+                                    <label>Professional Summary</label>
+                                    <textarea name="summary" placeholder="2–3 lines highlighting your impact and strengths. Keep it keyword‑rich for the target role."></textarea>
+                                    <label>Skills (comma or newline separated)</label>
+                                    <textarea name="skills" placeholder="Java, Spring Boot, REST APIs, MySQL, AWS, Docker"></textarea>
+                                </div>
+                                <div class="step" data-step="4" hidden>
+                                    <div class="repeatable" id="expList"></div>
+                                    <div class="actions" style="margin-top:6px">
+                                        <button type="button" class="btn ghost" onclick="addExperience()">+ Add experience</button>
+                                    </div>
+                                </div>
+                                <div class="step" data-step="5" hidden>
+                                    <div class="row">
+                                        <div style="flex:1">
+                                            <label>Target Job Title</label>
+                                            <input name="targetRole" placeholder="Software Engineer (Backend)" />
+                                        </div>
+                                        <div style="flex:1">
+                                            <label>Keywords for ATS (optional)</label>
+                                            <input name="keywords" placeholder="microservices, kubernetes, kafka, gcp" />
+                                        </div>
+                                    </div>
+                                    <div class="tips" style="margin-top:8px">Tip: Keep headings simple (Education, Skills, Experience). Avoid tables, icons, or graphics. Use consistent dates and hyphen bullets.</div>
+                                </div>
+                            </form>
+                            <div class="actions" style="margin-top:16px; justify-content:space-between">
+                                <div>
+                                    <button class="btn ghost" id="prevBtn" type="button">◀ Prev</button>
+                                    <button class="btn" id="nextBtn" type="button">Next ▶</button>
+                                </div>
+                                <div>
+                                    <button class="btn alt" id="previewBtn" type="button">Generate Preview</button>
+                                </div>
+                            </div>
+                            <div class="footer-note">Privacy: Your data never leaves this browser. All processing is local.</div>
+                        </div>
+                    </section>
+                    <section class="card">
+                        <div class="head">ATS preview & downloads</div>
+                        <div class="body">
+                            <div id="preview" class="preview">Fill the form and click <em>Generate Preview</em>.</div>
+                            <div class="actions" style="margin-top:14px; flex-wrap:wrap">
+                                <button class="btn ok" type="button" onclick="downloadPDF()">Download PDF</button>
+                                <button class="btn" type="button" onclick="downloadDOCX()">Download DOCX</button>
+                                <button class="btn" type="button" onclick="downloadPPTX()">Download PPTX</button>
+                                <button class="btn" type="button" onclick="downloadTXT()">Download TXT</button>
+                                <button class="btn ghost" type="button" onclick="saveJSON()">Export JSON</button>
+                                <button class="btn ghost" type="button" onclick="loadJSON()">Import JSON</button>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            `;
+        };
+
+        // --- Wizard state ---
+        const steps = [
+            { id: 1, title: 'Personal' },
+            { id: 2, title: 'Education' },
+            { id: 3, title: 'Skills & Summary' },
+            { id: 4, title: 'Experience' },
+            { id: 5, title: 'Target & Generate' },
+        ];
+        let currentStep = 1;
+        let wizard, stepper, previewEl;
+
+        // --- Repeatable blocks ---
+        function el(html) {
+            const t = document.createElement('template');
+            t.innerHTML = html.trim();
+            return t.content.firstChild;
+        }
+
+        function addEducation(data = {}) {
+            const block = el(`
+                <div class="edu card" style="padding:14px; margin-top:10px">
+                    <div class="row">
+                        <div style="flex:1">
+                            <label>Degree</label>
+                            <input name="degree" placeholder="B.E. Computer Science" value="${data.degree || ''}">
+                        </div>
+                        <div style="flex:1">
+                            <label>Institution</label>
+                            <input name="school" placeholder="VTU" value="${data.school || ''}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div style="flex:1">
+                            <label>Start</label>
+                            <input name="start" placeholder="Aug 2022" value="${data.start || ''}">
+                        </div>
+                        <div style="flex:1">
+                            <label>End</label>
+                            <input name="end" placeholder="Jun 2026" value="${data.end || ''}">
+                        </div>
+                    </div>
+                    <label>Details (achievements, CGPA, coursework)</label>
+                    <textarea name="details" placeholder="CGPA: 8.7/10; Coursework: DSA, DBMS, OS">${data.details || ''}</textarea>
+                    <div class="actions" style="margin-top:8px">
+                        <button type="button" class="remove" onclick="this.closest('.edu').remove()">Remove</button>
+                    </div>
+                </div>
+            `);
+            document.getElementById('eduList').appendChild(block);
+        }
+
+        function addExperience(data = {}) {
+            const block = el(`
+                <div class="exp card" style="padding:14px; margin-top:10px">
+                    <div class="row">
+                        <div style="flex:1">
+                            <label>Job Title</label>
+                            <input name="title" placeholder="Software Engineer" value="${data.title || ''}">
+                        </div>
+                        <div style="flex:1">
+                            <label>Company</label>
+                            <input name="company" placeholder="Acme Corp" value="${data.company || ''}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div style="flex:1">
+                            <label>Start</label>
+                            <input name="start" placeholder="Jan 2024" value="${data.start || ''}">
+                        </div>
+                        <div style="flex:1">
+                            <label>End</label>
+                            <input name="end" placeholder="Present" value="${data.end || ''}">
+                        </div>
+                    </div>
+                    <label>Bullets (one per line)</label>
+                    <textarea name="bullets" placeholder="- Built X that improved Y by Z%\n- Led 3-person team to deliver A before deadline">${data.bullets || ''}</textarea>
+                    <div class="actions" style="margin-top:8px">
+                        <button type="button" class="remove" onclick="this.closest('.exp').remove()">Remove</button>
+                    </div>
+                </div>
+            `);
+            document.getElementById('expList').appendChild(block);
+        }
+
+        // --- Data helpers ---
+        function getFormData() {
+            const data = {
+                firstName: wizard.firstName.value.trim(),
+                middleName: wizard.middleName.value.trim(),
+                lastName: wizard.lastName.value.trim(),
+                email: wizard.email.value.trim(),
+                phone: wizard.phone.value.trim(),
+                location: wizard.location.value.trim(),
+                dob: wizard.dob.value,
+                linkedin: wizard.linkedin.value.trim(),
+                github: wizard.github.value.trim(),
+                summary: wizard.summary.value.trim(),
+                skills: wizard.skills.value.split(/\n|,/).map(s => s.trim()).filter(Boolean),
+                targetRole: wizard.targetRole.value.trim(),
+                keywords: wizard.keywords.value.split(',').map(s => s.trim()).filter(Boolean),
+                education: [],
+                experience: []
+            };
+            document.querySelectorAll('#eduList .edu').forEach(b => {
+                data.education.push({
+                    degree: b.querySelector('input[name=degree]').value.trim(),
+                    school: b.querySelector('input[name=school]').value.trim(),
+                    start: b.querySelector('input[name=start]').value.trim(),
+                    end: b.querySelector('input[name=end]').value.trim(),
+                    details: b.querySelector('textarea[name=details]').value.trim(),
+                });
+            });
+            document.querySelectorAll('#expList .exp').forEach(b => {
+                const bulletsRaw = b.querySelector('textarea[name=bullets]').value.split(/\n/).map(s => s.trim()).filter(Boolean);
+                const bullets = bulletsRaw.map(line => line.replace(/^[-•\s]+/, ''));
+                data.experience.push({
+                    title: b.querySelector('input[name=title]').value.trim(),
+                    company: b.querySelector('input[name=company]').value.trim(),
+                    start: b.querySelector('input[name=start]').value.trim(),
+                    end: b.querySelector('input[name=end]').value.trim(),
+                    bullets
+                });
+            });
+            return data;
+        }
+
+        function fullName(d) {
+            return [d.firstName, d.middleName, d.lastName].filter(Boolean).join(' ');
+        }
+
+        function sanitize(text) {
+            return (text || '').replace(/[\u2022\t]/g, '-');
+        }
+
+        // --- ATS-friendly renderers ---
+        function buildPlainText(d) {
+            const lines = [];
+            const name = fullName(d).toUpperCase();
+            lines.push(name);
+            const meta = [d.location, d.phone, d.email, d.linkedin, d.github].filter(Boolean).join(' | ');
+            if (meta) lines.push(meta);
+            if (d.targetRole) lines.push(`TARGET: ${d.targetRole}`);
+            if (d.summary) {
+                lines.push('', sanitize(d.summary));
+            }
+            if (d.skills?.length) {
+                lines.push('', 'SKILLS');
+                lines.push(' - ' + d.skills.join(', '));
+            }
+            if (d.experience?.some(e => e.title || e.company || e.bullets?.length)) {
+                lines.push('', 'EXPERIENCE');
+                d.experience.forEach(e => {
+                    if (!(e.title || e.company || e.start || e.end || e.bullets?.length)) return;
+                    lines.push(`${e.title || ''}${(e.title && e.company) ? ', ' : ''}${e.company || ''} ${[e.start, e.end].filter(Boolean).join(' – ')}`.trim());
+                    (e.bullets || []).forEach(b => lines.push(` - ${sanitize(b)}`));
+                });
+            }
+            if (d.education?.some(ed => ed.degree || ed.school)) {
+                lines.push('', 'EDUCATION');
+                d.education.forEach(ed => {
+                    if (!(ed.degree || ed.school)) return;
+                    lines.push(`${ed.degree || ''}${(ed.degree && ed.school) ? ', ' : ''}${ed.school || ''} ${[ed.start, ed.end].filter(Boolean).join(' – ')}`.trim());
+                    if (ed.details) lines.push(` - ${sanitize(ed.details)}`);
+                });
+            }
+            if (d.keywords?.length) {
+                lines.push('', `KEYWORDS: ${d.keywords.join(', ')}`);
+            }
+            return lines.join('\n');
+        }
+
+        function buildHTML(d) {
+            const esc = s => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const para = t => `<p>${esc(t)}</p>`;
+            const meta = [d.location, d.phone, d.email, d.linkedin, d.github].filter(Boolean).join(' | ');
+            let html = `
+                <h1>${esc(fullName(d))}</h1>
+                ${meta ? `<div class="meta">${esc(meta)}</div>` : ''}
+                ${d.targetRole ? para(`TARGET: ${d.targetRole}`) : ''}
+            `;
+            if (d.summary) {
+                html += `<h2>Summary</h2>${para(d.summary)}`;
+            }
+            if (d.skills?.length) {
+                html += '<h2>Skills</h2>' + para(d.skills.join(', '));
+            }
+            if (d.experience?.some(e => e.title || e.company || e.bullets?.length)) {
+                html += '<h2>Experience</h2>';
+                d.experience.forEach(e => {
+                    if (!(e.title || e.company || e.bullets?.length)) return;
+                    html += `<div><strong>${esc(e.title || '')}${(e.title && e.company) ? ', ' : ''}${esc(e.company || '')}</strong> ${esc([e.start, e.end].filter(Boolean).join(' – '))}</div>`;
+                    if (e.bullets?.length) {
+                        html += '<ul>' + e.bullets.map(b => `<li>${esc(b)}</li>`).join('') + '</ul>';
+                    }
+                });
+            }
+            if (d.education?.some(ed => ed.degree || ed.school)) {
+                html += '<h2>Education</h2>';
+                d.education.forEach(ed => {
+                    if (!(ed.degree || ed.school)) return;
+                    html += `<div><strong>${esc(ed.degree || '')}${(ed.degree && ed.school) ? ', ' : ''}${esc(ed.school || '')}</strong> ${esc([ed.start, ed.end].filter(Boolean).join(' – '))}</div>`;
+                    if (ed.details) html += `<ul><li>${esc(ed.details)}</li></ul>`;
+                });
+            }
+            if (d.keywords?.length) {
+                html += `<h2>Keywords</h2>${para(d.keywords.join(', '))}`;
+            }
+            return html;
+        }
+
+        function generatePreview() {
+            const requiredOk = wizard.firstName.value && wizard.lastName.value && wizard.email.validity.valid;
+            if (!requiredOk) {
+                alert('Please provide First name, Last name, and a valid Email. Other fields are optional.');
+                return;
+            }
+            const d = getFormData();
+            previewEl.innerHTML = buildHTML(d);
+        }
+
+        // --- Downloads ---
+        async function downloadPDF() {
+            const d = getFormData();
+            const text = buildPlainText(d);
+            const {
+                jsPDF
+            } = window.jspdf;
+            const doc = new jsPDF({
+                unit: 'pt',
+                format: 'a4'
+            });
+            doc.setFont('helvetica', '');
+            doc.setFontSize(12);
+            const margin = 40;
+            const maxWidth = 515; // A4: 595 - margins
+            const lines = doc.splitTextToSize(text, maxWidth);
+            let y = margin;
+            lines.forEach(line => {
+                if (y > 800) {
+                    doc.addPage();
+                    y = margin;
+                }
+                doc.text(line, margin, y);
+                y += 16;
+            });
+            doc.save(`${slug(fullName(d) || 'resume')}.pdf`);
+        }
+
+        async function downloadDOCX() {
+            const d = getFormData();
+            const {
+                Document,
+                Packer,
+                Paragraph,
+                TextRun,
+                HeadingLevel
+            } = window.docx;
+            const doc = new Document({
+                sections: [{
+                    properties: {},
+                    children: buildDocxChildren(d)
+                }]
+            });
+            const blob = await Packer.toBlob(doc);
+            triggerBlob(blob, `${slug(fullName(d) || 'resume')}.docx`);
+        }
+
+        function buildDocxChildren(d) {
+            const {
+                Paragraph,
+                HeadingLevel
+            } = window.docx;
+            const children = [];
+            const name = fullName(d).toUpperCase();
+            children.push(new Paragraph({
+                text: name,
+                heading: HeadingLevel.HEADING_1
+            }));
+            const meta = [d.location, d.phone, d.email, d.linkedin, d.github].filter(Boolean).join(' | ');
+            if (meta) children.push(new Paragraph(meta));
+            if (d.targetRole) children.push(new Paragraph(`TARGET: ${d.targetRole}`));
+            if (d.summary) {
+                children.push(new Paragraph({
+                    text: 'Summary',
+                    heading: HeadingLevel.HEADING_2
+                }));
+                children.push(new Paragraph(d.summary));
+            }
+            if (d.skills?.length) {
+                children.push(new Paragraph({
+                    text: 'Skills',
+                    heading: HeadingLevel.HEADING_2
+                }));
+                children.push(new Paragraph(d.skills.join(', ')));
+            }
+            if (d.experience?.some(e => e.title || e.company || e.bullets?.length)) {
+                children.push(new Paragraph({
+                    text: 'Experience',
+                    heading: HeadingLevel.HEADING_2
+                }));
+                d.experience.forEach(e => {
+                    const line = `${e.title || ''}${(e.title && e.company) ? ', ' : ''}${e.company || ''} ${[e.start, e.end].filter(Boolean).join(' – ')}`.trim();
+                    if (line) children.push(new Paragraph({
+                        text: line,
+                        spacing: {
+                            after: 50
+                        }
+                    }));
+                    (e.bullets || []).forEach(b => children.push(new Paragraph({
+                        text: `- ${b}`
+                    })));
+                });
+            }
+            if (d.education?.some(ed => ed.degree || ed.school)) {
+                children.push(new Paragraph({
+                    text: 'Education',
+                    heading: HeadingLevel.HEADING_2
+                }));
+                d.education.forEach(ed => {
+                    const line = `${ed.degree || ''}${(ed.degree && ed.school) ? ', ' : ''}${ed.school || ''} ${[ed.start, ed.end].filter(Boolean).join(' – ')}`.trim();
+                    if (line) children.push(new Paragraph({
+                        text: line
+                    }));
+                    if (ed.details) children.push(new Paragraph({
+                        text: `- ${ed.details}`
+                    }));
+                });
+            }
+            if (d.keywords?.length) {
+                children.push(new Paragraph({
+                    text: 'Keywords',
+                    heading: HeadingLevel.HEADING_2
+                }));
+                children.push(new Paragraph(d.keywords.join(', ')));
+            }
+            return children;
+        }
+
+        async function downloadPPTX() {
+            const d = getFormData();
+            const pptx = new PptxGenJS();
+            pptx.author = fullName(d) || 'ATSFlow';
+            pptx.title = 'Resume';
+            let slide = pptx.addSlide();
+            slide.addText(fullName(d), {
+                x: 0.5,
+                y: 0.5,
+                fontSize: 24,
+                bold: true
+            });
+            const meta = [d.location, d.phone, d.email, d.linkedin, d.github].filter(Boolean).join(' | ');
+            slide.addText(meta, {
+                x: 0.5,
+                y: 1.1,
+                fontSize: 12
+            });
+            if (d.summary) {
+                slide.addText('Summary', {
+                    x: 0.5,
+                    y: 1.7,
+                    fontSize: 16,
+                    bold: true
+                });
+                slide.addText(d.summary, {
+                    x: 0.5,
+                    y: 2.0,
+                    fontSize: 12,
+                    wrap: true,
+                    w: 9
+                });
+            }
+            if (d.skills?.length) {
+                slide = pptx.addSlide();
+                slide.addText('Skills', {
+                    x: 0.5,
+                    y: 0.5,
+                    fontSize: 18,
+                    bold: true
+                });
+                slide.addText(d.skills.join(', '), {
+                    x: 0.5,
+                    y: 1.0,
+                    fontSize: 12,
+                    wrap: true,
+                    w: 9
+                });
+            }
+            if (d.experience?.length) {
+                slide = pptx.addSlide();
+                slide.addText('Experience', {
+                    x: 0.5,
+                    y: 0.5,
+                    fontSize: 18,
+                    bold: true
+                });
+                let y = 1.0;
+                d.experience.forEach(e => {
+                    const title = `${e.title || ''}${(e.title && e.company) ? ', ' : ''}${e.company || ''}`.trim();
+                    slide.addText(title, {
+                        x: 0.5,
+                        y,
+                        fontSize: 14,
+                        bold: true
+                    });
+                    y += 0.3;
+                    slide.addText([e.start, e.end].filter(Boolean).join(' – '), {
+                        x: 0.5,
+                        y,
+                        fontSize: 11
+                    });
+                    y += 0.25;
+                    (e.bullets || []).forEach(b => {
+                        slide.addText(`- ${b}`, {
+                            x: 0.7,
+                            y,
+                            fontSize: 11,
+                            wrap: true,
+                            w: 9
+                        });
+                        y += 0.24;
+                    });
+                    y += 0.1;
+                });
+            }
+            if (d.education?.length) {
+                slide = pptx.addSlide();
+                slide.addText('Education', {
+                    x: 0.5,
+                    y: 0.5,
+                    fontSize: 18,
+                    bold: true
+                });
+                let y = 1.0;
+                d.education.forEach(ed => {
+                    slide.addText(`${ed.degree || ''}${(ed.degree && ed.school) ? ', ' : ''}${ed.school || ''}`.trim(), {
+                        x: 0.5,
+                        y,
+                        fontSize: 14,
+                        bold: true
+                    });
+                    y += 0.3;
+                    slide.addText([ed.start, ed.end].filter(Boolean).join(' – '), {
+                        x: 0.5,
+                        y,
+                        fontSize: 11
+                    });
+                    y += 0.25;
+                    if (ed.details) {
+                        slide.addText(`- ${ed.details}`, {
+                            x: 0.7,
+                            y,
+                            fontSize: 11,
+                            wrap: true,
+                            w: 9
+                        });
+                        y += 0.24;
+                    }
+                    y += 0.1;
+                });
+            }
+            await pptx.writeFile({
+                fileName: `${slug(fullName(d) || 'resume')}.pptx`
+            });
+        }
+
+        function downloadTXT() {
+            const d = getFormData();
+            const text = buildPlainText(d);
+            const blob = new Blob([text], {
+                type: 'text/plain'
+            });
+            triggerBlob(blob, `${slug(fullName(d) || 'resume')}.txt`);
+        }
+
+        function triggerBlob(blob, filename) {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        }
+
+        function slug(s) {
+            return (s || 'resume').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        }
+
+        // --- JSON import/export for convenience ---
+        function saveJSON() {
+            const data = getFormData();
+            const blob = new Blob([JSON.stringify(data, null, 2)], {
+                type: 'application/json'
+            });
+            triggerBlob(blob, `${slug(fullName(data) || 'resume')}.json`);
+        }
+
+        function loadJSON() {
+            const inp = document.createElement('input');
+            inp.type = 'file';
+            inp.accept = 'application/json';
+            inp.onchange = () => {
+                const file = inp.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    try {
+                        const d = JSON.parse(reader.result);
+                        wizard.firstName.value = d.firstName || '';
+                        wizard.middleName.value = d.middleName || '';
+                        wizard.lastName.value = d.lastName || '';
+                        wizard.email.value = d.email || '';
+                        wizard.phone.value = d.phone || '';
+                        wizard.location.value = d.location || '';
+                        wizard.dob.value = d.dob || '';
+                        wizard.linkedin.value = d.linkedin || '';
+                        wizard.github.value = d.github || '';
+                        wizard.summary.value = d.summary || '';
+                        wizard.skills.value = (d.skills || []).join(', ');
+                        wizard.targetRole.value = d.targetRole || '';
+                        wizard.keywords.value = (d.keywords || []).join(', ');
+                        document.getElementById('eduList').innerHTML = '';
+                        (d.education || []).forEach(addEducation);
+                        if ((d.education || []).length === 0) addEducation();
+                        document.getElementById('expList').innerHTML = '';
+                        (d.experience || []).forEach(addExperience);
+                        if ((d.experience || []).length === 0) addExperience();
+                        generatePreview();
+                    } catch (e) {
+                        alert('Invalid JSON');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            inp.click();
+        }
+
+        // --- Page Initialization ---
+        function init() {
+            injectStyles();
+            injectScripts();
+            createPageStructure();
+            
+            // Wait for the DOM to be fully loaded before attaching events
+            setTimeout(() => {
+                wizard = document.getElementById('wizard');
+                stepper = document.getElementById('stepper');
+                previewEl = document.getElementById('preview');
+
+                document.getElementById('prevBtn').addEventListener('click', () => {
+                    if (currentStep > 1) showStep(currentStep - 1);
+                });
+                document.getElementById('nextBtn').addEventListener('click', () => {
+                    if (currentStep < steps.length) showStep(currentStep + 1);
+                    else generatePreview();
+                });
+                document.getElementById('previewBtn').addEventListener('click', generatePreview);
+
+                // Dynamically attach click handlers for repeatable sections
+                window.addEducation = addEducation;
+                window.addExperience = addExperience;
+                window.downloadPDF = downloadPDF;
+                window.downloadDOCX = downloadDOCX;
+                window.downloadPPTX = downloadPPTX;
+                window.downloadTXT = downloadTXT;
+                window.saveJSON = saveJSON;
+                window.loadJSON = loadJSON;
+
+                addEducation();
+                addExperience();
+                renderStepper();
+                showStep(1);
+            }, 100);
+        }
+        
+        // --- Wizard navigation functions ---
+        function renderStepper() {
+            stepper.innerHTML = steps.map(s => `
+                <div class="chip ${s.id === currentStep ? 'active' : ''}">
+                    <span class="dot"></span> Step ${s.id}: ${s.title}
+                </div>
+            `).join('');
+        }
+
+        function showStep(id) {
+            currentStep = id;
+            [...wizard.querySelectorAll('.step')].forEach(el => {
+                el.hidden = Number(el.dataset.step) !== id;
+            });
+            renderStepper();
+            document.getElementById('prevBtn').disabled = id === 1;
+            document.getElementById('nextBtn').textContent = id === steps.length ? 'Finish' : 'Next ▶';
+        }
+
+        init();
+    });
+</script>
+
+</body>
+</html>
